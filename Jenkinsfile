@@ -15,14 +15,31 @@ pipeline {
 
         stage('Check Versions') {
             steps {
-                sh 'java -version'
-                sh 'mvn -version'
+                sh '''
+                echo "=== Java Version ==="
+                java -version
+
+                echo "=== Maven Version ==="
+                mvn -version
+                '''
             }
         }
 
         stage('Build JAR') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh '''
+                echo "=== Before setting Java ==="
+                java -version || true
+
+                export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                export PATH=$JAVA_HOME/bin:$PATH
+
+                echo "=== After setting Java ==="
+                java -version
+                javac -version
+
+                mvn clean package -DskipTests
+                '''
             }
         }
 
@@ -38,11 +55,13 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: DOCKER_CREDENTIALS_ID,
+                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
                 }
             }
         }
