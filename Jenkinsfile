@@ -1,8 +1,10 @@
 pipeline {
-    agent any
-    tools {
-        jdk 'JDK-17'        // 👈 REQUIRED
-        maven 'Maven-3.9'
+
+    agent {
+        docker {
+            image 'maven:3.9.9-eclipse-temurin-17'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     environment {
@@ -14,6 +16,8 @@ pipeline {
 
         stage('Build JAR') {
             steps {
+                sh 'java -version'
+                sh 'mvn -version'
                 sh 'mvn clean package -DskipTests'
             }
         }
@@ -30,7 +34,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: "$docker-creds",
+                    credentialsId: DOCKER_CREDENTIALS_ID,
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
@@ -47,15 +51,14 @@ pipeline {
                 '''
             }
         }
-
     }
 
     post {
         success {
-            echo "✅ Image pushed with tags: $BUILD_NUMBER and latest"
+            echo "✅ Image pushed successfully: $DOCKERHUB_REPO:$BUILD_NUMBER & latest"
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo "❌ Pipeline failed!"
         }
     }
 }
