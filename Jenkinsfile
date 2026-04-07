@@ -1,10 +1,9 @@
 pipeline {
+    agent any
 
-    agent {
-        docker {
-            image 'maven:3.9.9-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    tools {
+        jdk 'JDK-17'
+        maven 'Maven-3.9'
     }
 
     environment {
@@ -14,10 +13,21 @@ pipeline {
 
     stages {
 
-        stage('Build JAR') {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/Reshufowzi/ems-backend.git'
+            }
+        }
+
+        stage('Check Versions') {
             steps {
                 sh 'java -version'
                 sh 'mvn -version'
+            }
+        }
+
+        stage('Build JAR') {
+            steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
@@ -43,7 +53,7 @@ pipeline {
             }
         }
 
-        stage('Push Image to Docker Hub') {
+        stage('Push Image') {
             steps {
                 sh '''
                 docker push $DOCKERHUB_REPO:$BUILD_NUMBER
@@ -55,10 +65,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Image pushed successfully: $DOCKERHUB_REPO:$BUILD_NUMBER & latest"
+            echo "✅ Image pushed: $BUILD_NUMBER & latest"
         }
         failure {
-            echo "❌ Pipeline failed!"
+            echo "❌ Pipeline failed"
         }
     }
 }
