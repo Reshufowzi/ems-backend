@@ -7,11 +7,10 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Step 2: Run stage
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# ✅ Use fixed JAR name (best practice)
 COPY --from=builder /app/target/ems-app.jar app.jar
 
 EXPOSE 8080
