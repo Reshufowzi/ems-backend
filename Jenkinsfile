@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    tools {
+        jdk 'JDK17'        // 👈 REQUIRED
+        maven 'Maven-3.9'
+    }
 
     environment {
         DOCKERHUB_REPO = "reshma0209/ems-app"
