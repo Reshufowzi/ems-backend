@@ -13,12 +13,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/Reshufowzi/ems-backend.git'
-            }
-        }
-
         stage('Check Versions') {
             steps {
                 sh 'java -version'
