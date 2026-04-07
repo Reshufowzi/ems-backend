@@ -1,9 +1,4 @@
-FROM eclipse-temurin:17-jre-alpine
-
+FROM openjdk:21-jdk-slim
 WORKDIR /app
-
-COPY target/ems-app.jar app.jar
-
-EXPOSE 8080
-
+COPY target/app.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
